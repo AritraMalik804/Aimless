@@ -1,0 +1,1711 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Valorant Group Landing</title>
+  
+  <!-- Import GSAP (GreenSock Animation Platform) -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+  
+  <!-- Import Google Font -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+  <style>
+    /* --- Styles from TargetCursor.css --- */
+    @font-face {
+      font-family: 'Valorant';
+      /* Ensure the "Valorant Font.ttf" file is in the same directory as this HTML file */
+      src: url('Valorant Font.ttf') format('truetype');
+      font-weight: normal;
+      font-style: normal;
+    }
+
+    .target-cursor-wrapper {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 0;
+      height: 0;
+      pointer-events: none;
+      z-index: 9999;
+      mix-blend-mode: exclusion;
+      transform: translate(-50%, -50%);
+    }
+
+    .target-cursor-dot {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 4px;
+      height: 4px;
+      background: #fff;
+      border-radius: 50%;
+      transform: translate(-50%, -50%);
+      will-change: transform;
+    }
+
+    .target-cursor-corner {
+      position: absolute;
+      left: 50%;
+      top: 50%;
+      width: 12px;
+      height: 12px;
+      border: 3px solid #fff;
+      will-change: transform;
+    }
+
+    .corner-tl {
+      transform: translate(-150%, -150%);
+      border-right: none;
+      border-bottom: none;
+    }
+
+    .corner-tr {
+      transform: translate(50%, -150%);
+      border-left: none;
+      border-bottom: none;
+    }
+
+    .corner-br {
+      transform: translate(50%, 50%);
+      border-left: none;
+      border-top: none;
+    }
+
+    .corner-bl {
+      transform: translate(-150%, 50%);
+      border-right: none;
+      border-top: none;
+    }
+
+    /* --- General Page & Navigation Styles --- */
+
+    body {
+      font-family: 'Valorant', 'Inter', sans-serif;
+      background-color: #1a1a1a;
+      color: #eee;
+      height: 100vh;
+      margin: 0;
+      overflow: hidden;
+      /* Hide the default cursor if the script is running */
+      cursor: none;
+    }
+
+    /* Page container styles */
+    .page {
+      display: none; /* Pages are hidden by default */
+      min-height: 100vh;
+      box-sizing: border-box;
+      padding: 2rem;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      width: 100%;
+      animation: fadeIn 0.5s ease-in-out;
+      position: relative; /* Added to contain the background icon */
+    }
+
+    .page.active-page {
+      display: flex; /* Show the active page */
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Remove old h1 style */
+    h1 {
+      margin-bottom: 0.5rem;
+    }
+
+    /* --- Home Page Styles --- */
+
+    #page-home {
+      /* UPDATED: Set the background image.
+        You must replace this placeholder URL with your "Beta Key Art_VALORANT.jpg" file.
+      */
+      background-image: url('Images/Beta Key Art_VALORANT.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      /* Add an overlay to darken it for text contrast */
+      position: relative;
+    }
+
+    /* Add an ::before pseudo-element for the overlay */
+    #page-home::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(10, 10, 10, 0.7); /* Dark overlay */
+      z-index: 1;
+    }
+
+    /* Make content sit on top of the overlay */
+    #page-home .content-wrapper {
+      position: relative;
+      z-index: 2;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between; /* This will push top/bottom elements to edges */
+      padding: 0; /* Remove padding, will add to child elements */
+      min-height: 100vh;
+      box-sizing: border-box;
+    }
+
+    /* NEW: Top row container */
+    .top-row {
+      display: flex;
+      justify-content: center;
+      align-items: flex-start; /* Align to top */
+      width: 100%;
+      padding: 2rem 2.5rem 0 2.5rem; /* Add top padding and side padding */
+      box-sizing: border-box; /* Include padding in width */
+    }
+    
+    /* NEW: Center content container */
+    .center-content {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      width: 100%;
+      padding: 1rem;
+      flex-grow: 1; /* This forces the content to take up all remaining vertical space, centering it */
+      box-sizing: border-box;
+    }
+    
+    /* NEW: Empty spacer for bottom */
+    .bottom-spacer {
+      height: 2rem; /* Just to provide some space */
+    }
+
+    /* New styles for the image-based logo */
+    .team-logo {
+      max-width: 800px;
+      width: 180%;
+      height: auto;
+      margin-bottom: 1rem;
+      display: block;
+      filter: drop-shadow(0 0 10px rgba(0,0,0,0.5));
+    }
+
+    /* New styles for the sub-graphic images */
+    .sub-graphic {
+      width: auto; /* Let max-width control it */
+      height: auto;
+      margin: 0; /* Remove default margins */
+    }
+    .defy-limits {
+      position: absolute;
+      top: 0;
+      left: 0;
+      max-width: 250px; 
+      opacity: 0.9;
+      margin-left: -400px; /* Push further left */
+      margin-top: -30px; /* Push further up */
+      transform: translateX(0); /* Reset transform to ensure margin works from 'left: 0' */
+    }
+    .meet-group {
+      max-width: 400px;
+      margin-top: 1.5rem; /* Add space above buttons */
+      margin-bottom: 1.5rem;
+    }
+    .battlefield-arena {
+      position: absolute;
+      top: 0;
+      right: 0;
+      max-width: 350px; 
+      opacity: 0.9;
+      margin-right: -410px; /* Push further right */
+      margin-top: -30px; /* Push further up */
+      transform: translateX(0); /* Reset transform to ensure margin works from 'right: 0' */
+    }
+    .footer-graphic {
+      max-width: 800px; 
+      width: 60%; 
+      opacity: 1; 
+      padding-top: 0; /* REMOVED: Padding is now 0 */
+      margin-top: -1.5rem; /* NEW: Negative margin to force it upwards */
+      position: relative; 
+      z-index: 5;
+      object-fit: contain;
+    }
+
+
+    .button-container {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 4rem;
+    }
+
+    /* Updated home page button style for new theme */
+    #page-home .cursor-target {
+      /* Set specific width so they look uniform when expanding */
+      width: 220px; 
+      height: 60px; /* Initial Height */
+      
+      padding: 0; /* Reset padding to handle flex alignment */
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      
+      border: 2px solid #ff4655; /* Valorant Red */
+      border-radius: 4px; /* Sharper corners */
+      
+      /* Font family explicitly set to inherit or custom */
+      font-family: 'Valorant', sans-serif;
+
+      font-size: 1.1rem;
+      font-weight: 700;
+      color: #fff;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      
+      cursor: none;
+      position: relative; /* Important for pseudo-element positioning */
+      overflow: hidden;   /* Keep image inside border */
+      
+      background-color: rgba(255, 70, 85, 0.1); /* Faint red glow initially */
+      /* Add a subtle initial glow */
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+      
+      /* Animate height and other props */
+      transition: height 0.4s cubic-bezier(0.25, 0.1, 0.25, 1), 
+                  transform 0.4s cubic-bezier(0.25, 0.1, 0.25, 1), 
+                  box-shadow 0.3s ease, 
+                  border-color 0.3s ease;
+    }
+    
+    /* Pseudo-element for the character preview image */
+    #page-home .cursor-target::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; width: 100%; height: 100%;
+      
+      /* Use CSS variable for image source */
+      background-image: var(--btn-preview); 
+      background-size: cover;
+      background-position: top center;
+      
+      /* Initial state: hidden/faded */
+      opacity: 0;
+      /* Apply filters: Low brightness (dim) */
+      filter: brightness(20%) grayscale(20%) contrast(110%) blur(2px);
+      
+      transition: opacity 0.4s ease;
+      z-index: -1; /* Behind text */
+    }
+
+    /* Text styling span to ensure it stays on top */
+    #page-home .cursor-target span {
+      position: relative;
+      z-index: 2;
+      text-shadow: 0 2px 4px rgba(0,0,0,0.8);
+    }
+
+    #page-home .cursor-target:hover {
+      /* UPDATED: Expand height on hover */
+      height: 280px; 
+      
+      /* Move slightly up to simulate expanding "up" */
+      transform: translateY(-20px) scale(1.02);
+      
+      border-color: #fff;
+      
+      /* UPDATED: Made glow significantly more prominent with two layers of shadow */
+      box-shadow: 0 0 25px 5px var(--glow-color, #ff4655);
+      
+      /* Background color change handled by image now, but keep fallback */
+      background-color: rgba(0, 0, 0, 0.8); 
+      z-index: 10;
+    }
+
+    /* Reveal the background image on hover */
+    #page-home .cursor-target:hover::before {
+      opacity: 1;
+    }
+    
+    /* Specific Agent Styles */
+    .sage-button {
+      --glow-color: #4FD1C5;
+      border-color: #4FD1C5;
+      /* Placeholder for Sage preview image */
+      --btn-preview: url('Images/Sage_Artwork_Full.png');
+    }
+
+    .iso-button {
+      --glow-color: #8A4FD1;
+      border-color: #8A4FD1;
+      /* Placeholder for Iso preview image */
+      --btn-preview: url('Images/Iso_Artwork_Full.png');
+    }
+
+    .yoru-button {
+      --glow-color: #4F6AD1;
+      border-color: #4F6AD1;
+      /* Placeholder for Yoru preview image */
+      --btn-preview: url('Images/Yoru_Artwork_Full.png');
+    }
+
+
+    /* --- Character Page Styles --- */
+
+    /* Page-specific themes */
+    #page-sage {
+      background: radial-gradient(circle at top, #2a5a55, #1a1a1a 70%);
+    }
+    #page-iso {
+      background: radial-gradient(circle at top, #4a2a5a, #1a1a1a 70%);
+    }
+    #page-yoru {
+      background: radial-gradient(circle at top, #2a3a5a, #1a1a1a 70%);
+    }
+
+    .character-layout {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      align-items: center;
+      gap: 2rem;
+      width: 100%;
+      max-width: 1000px;
+      perspective: 1500px; /* Adds 3D depth for the tilt */
+      margin-bottom: 2rem;
+      position: relative; /* Added to stay above background icon */
+      z-index: 1; /* Added to stay above background icon */
+    }
+
+    /* --- Card Description Panel --- */
+    .card-description {
+      position: absolute;
+      top: 0;
+      width: 280px; /* Width of description panel */
+      height: 100%;
+      background: rgba(20, 20, 20, 0.9); /* Darker background */
+      border: 1px solid #666;
+      border-radius: 8px;
+      padding: 1.5rem;
+      box-sizing: border-box;
+      
+      /* Initially hidden */
+      opacity: 0;
+      pointer-events: none;
+      
+      transition: all 0.4s cubic-bezier(0.25, 0.1, 0.25, 1);
+      z-index: -1; /* Starts behind */
+      
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      text-align: left;
+      box-shadow: 0 0 20px rgba(0,0,0,0.5);
+    }
+
+    .card-description h4 {
+      margin-top: 0.1rem;
+      margin-bottom: 0.1rem;
+      color: #ff4655; /* Valorant Red */
+      font-family: 'Valorant', sans-serif;
+      font-size: 1rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+    }
+    
+    /* --- Ability Icons & Video Popup --- */
+    .abilities-container {
+      margin-top: 1.5rem;
+      border-top: 1px solid #444;
+      padding-top: 1rem;
+    }
+
+    .abilities-row {
+      display: flex;
+      padding-top: 1rem;
+      justify-content: space-between;
+      align-items: center; /* Fixes the vertical stretching bug */
+      gap: 0.5rem;
+    }
+
+    /* UPDATED: Fixed Icon Dimensions & Overflow */
+    .ability-icon {
+      flex: 0 0 45px; /* Don't shrink or grow */
+      width: 45px;
+      height: 45px;
+      background-color: rgba(255, 255, 255, 0.1);
+      border: 1px solid rgba(255, 255, 255, 0.2);
+      border-radius: 4px;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      position: relative; /* Anchor for the popup */
+      transition: all 0.3s ease;
+      overflow: visible; /* Allow popup to show */
+    }
+
+    /* UPDATED: Fixed Image Dimensions */
+    .ability-icon img {
+      width: 28px; /* Fixed size instead of % */
+      height: 28px;
+      object-fit: contain;
+      filter: grayscale(1) brightness(0.8);
+      transition: filter 0.3s ease;
+      display: block;
+    }
+
+    .ability-icon:hover {
+      background-color: rgba(255, 70, 85, 0.2);
+      border-color: #ff4655;
+    }
+    
+    .ability-icon:hover img {
+      filter: grayscale(0) brightness(1);
+    }
+
+    /* Video Tooltip/Popup */
+    .ability-video-popup {
+      position: absolute;
+      bottom: 120%; /* Position above the icon */
+      left: 50%;
+      transform: translateX(-50%) translateY(10px) translateZ(0);
+      will-change: transform, opacity;
+      isolation: isolate;
+      width: 200px;
+      height: 112px; /* 16:9 Aspect Ratio approx */
+      background-color: #000;
+      border: 1px solid #ff4655;
+      border-radius: 4px;
+      opacity: 0;
+      visibility: hidden;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 15px rgba(0, 0, 0, 0.8);
+      z-index: 200;
+      /*pointer-events: none; /* Prevent flickering when hovering popup */
+      overflow: hidden;
+    }
+
+    /* --- FULL SCREEN VIDEO MODAL --- */
+    #video-modal {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.9);
+      z-index: 10000; /* Top of everything */
+      display: none; /* Hidden by default */
+      justify-content: center;
+      align-items: center;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+    }
+
+    #video-modal.active {
+      display: flex;
+      opacity: 1;
+    }
+
+    .modal-content {
+      width: 80%;
+      max-width: 1000px;
+      position: relative;
+      border: 2px solid #ff4655;
+      background: #000;
+      box-shadow: 0 0 30px rgba(255, 70, 85, 0.3);
+    }
+
+    /* Aspect ratio container for video */
+    .video-wrapper {
+      position: relative;
+      padding-bottom: 56.25%; /* 16:9 */
+      height: 0;
+      overflow: hidden;
+    }
+
+    .video-wrapper video {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+    }
+
+    .close-modal-btn {
+      position: absolute;
+      top: -40px;
+      right: 0;
+      background: transparent;
+      border: none;
+      color: #fff;
+      font-family: 'Valorant', sans-serif;
+      font-size: 1.5rem;
+      cursor: pointer;
+      transition: color 0.3s;
+    }
+
+    .settings-text {
+        font-family: 'Valorant', 'Inter', sans-serif;
+        font-size: 0.9rem;
+        line-height: 1.4;
+        color: #aaa;
+        white-space: pre-line; /* Preserve line breaks */
+    }
+
+    .close-modal-btn:hover {
+      color: #ff4655;
+    }
+
+    .ability-video-popup video {
+      width: 100%;
+      height: 100%;
+      object-fit: cover;
+      position: relative;
+      transform: translateZ(0);
+      z-index: 5;
+      background-color: transparent;
+    }
+
+    /* Show popup on hover */
+    .ability-icon:hover .ability-video-popup {
+      opacity: 1;
+      visibility: visible;
+      transform: translateX(-50%) translateY(0);
+    }
+
+    /* --- HOVER BRIDGE FIX --- */
+    /* Create an invisible bridge to connect the card and description */
+    .card-description::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      width: 60px; /* Enough to cover the gap (margin is 20px) */
+      height: 100%;
+      background: transparent; 
+      z-index: 1;
+    }
+
+    .character-portrait {
+      width: 100%;
+      height: 400px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    /* Position the bridge correctly for Left vs Right cards */
+    /* For Left card, description is to the right, so bridge extends left */
+    .character-card.left .card-description::before {
+      right: 100%; 
+    }
+    
+    /* For Right card, description is to the left, so bridge extends right */
+    .character-card.right .card-description::before {
+      left: 100%; 
+    }
+
+    .card-description h3 {
+      margin-top: 0;
+      color: #fff;
+      font-family: 'Valorant', sans-serif;
+      font-size: 1.2rem;
+      margin-bottom: 1rem;
+      border-bottom: 2px solid #444;
+      padding-bottom: 0.5rem;
+    }
+    
+    .card-description p {
+      font-family: 'Inter', sans-serif;
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: #ccc;
+    }
+
+    /* --- HOVER BRIDGE FIX --- */
+    /* Create an invisible bridge to connect the card and description */
+    .card-description::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      width: 80px; /* Wide enough to cover the gap between card and panel */
+      height: 100%;
+      background: transparent; /* Invisible */
+      z-index: 10; /* Keeps it interactive */
+    }
+
+    /* --- Left Card Interactions --- */
+    .character-card.left {
+      transform: rotateY(10deg) scale(0.95);
+      transform-origin: center;
+    }
+    
+    /* Zoom out on hover */
+    .character-card.left:hover {
+      transform: rotateY(0deg) scale(0.85); /* Scale down (zoom out) & straighten */
+      z-index: 10;
+      box-shadow: 0 0 30px rgba(0,0,0,0.8);
+    }
+
+    /* Left Card: Description is on the LEFT. Bridge sticks out to the RIGHT to touch the card. */
+    .character-card.left .card-description::before {
+      left: 100%; 
+      right: auto;
+    }
+
+    /* Left Description - Appears to the LEFT */
+    .character-card.left .card-description {
+      right: 100%; 
+      margin-right: -50px; 
+      top: 0;
+      transform: rotateY(-10deg); 
+      pointer-events: none; /* Initially uninteractable to prevent flickering */
+    }
+
+    .character-card.left:hover .card-description {
+      opacity: 1;
+      pointer-events: auto; /* Now interactive */
+      margin-right: 20px; 
+      transform: rotateY(0deg); 
+    }
+    
+    /* --- Right Card Interactions --- */
+    .character-card.right {
+      transform: rotateY(-10deg) scale(0.95);
+      transform-origin: center;
+    }
+    
+    .character-card.right:hover {
+      transform: rotateY(0deg) scale(0.85); /* Scale down (zoom out) & straighten */
+      z-index: 10;
+      box-shadow: 0 0 30px rgba(0,0,0,0.8);
+    }
+
+    /* Right Description - Appears to the RIGHT */
+    .character-card.right .card-description {
+      left: 100%; 
+      margin-left: -50px; 
+      top: 0;
+      transform: rotateY(10deg);
+      pointer-events: none;
+    }
+
+    .character-card.right:hover .card-description {
+      opacity: 1;
+      pointer-events: auto;
+      margin-left: 20px; 
+      transform: rotateY(0deg);
+    }
+
+    /* Right Card: Description is on the RIGHT. Bridge sticks out to the LEFT to touch the card. */
+    .character-card.right .card-description::before {
+      right: 100%;
+      left: auto;
+    }
+
+    .character-card {
+      background: #222222aa;
+      border: 1px solid #444;
+      border-radius: 12px;
+      padding: 1rem;
+      text-align: center;
+      width: 320px;
+      backdrop-filter: blur(5px);
+      transition: transform 0.3s ease, box-shadow 0.3s ease;
+    }
+    
+    .character-card:hover {
+      transform: scale(1.02); /* Slight grow on hover */
+      box-shadow: 0 0 20px #000;
+    }
+
+    .character-card > img {
+      width: 100%;
+      height: 400px;
+      object-fit: cover;
+      border-radius: 8px;
+    }
+
+    .character-card h2 {
+      margin-top: 1rem;
+      margin-bottom: 0.5rem;
+      font-size: 1.5rem;
+      text-transform: uppercase;
+    }
+
+    /* The Tilt Effect */
+    .character-card.left {
+      transform: rotateY(10deg) scale(0.85);
+    }
+    .character-card.left:hover {
+      transform: rotateY(5deg) scale(1);
+    }
+    
+    .character-card.right {
+      transform: rotateY(-10deg) scale(0.85);
+    }
+    .character-card.right:hover {
+      transform: rotateY(-5deg) scale(1);
+    }
+
+    .back-button-container {
+      width: 100%;
+      max-width: 1000px; /* Match the layout width */
+      display: flex;
+      justify-content: flex-end; /* Align button to the right */
+      position: relative; /* Added to stay above background icon */
+      z-index: 1; /* Added to stay above background icon */
+    }
+
+     /* UPDATED BACK BUTTON STYLES */
+    .back-button {
+      background-color: transparent;
+      border: 1px solid rgba(255, 255, 255, 0.5);
+      color: #fff;
+      padding: 1rem 2.5rem;
+      font-family: 'Valorant', sans-serif;
+      font-size: 1rem;
+      letter-spacing: 2px;
+      text-transform: uppercase;
+      cursor: none;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.3s ease;
+      z-index: 1; /* Ensure text is above pseudo element */
+    }
+    .back-button::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background-color: #ff4655;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      z-index: -1;
+    }
+
+    .back-button:hover {
+      border-color: #ff4655;
+      box-shadow: 0 0 20px rgba(255, 70, 85, 0.6);
+    }
+
+    .back-button:hover::before {
+      transform: translateX(0);
+    }
+
+    /* New style for the background icon */
+    .page-bg-icon {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      width: 300px; /* You can adjust this size */
+      height: 300px;
+      object-fit: contain;
+      opacity: 0.2; /* Faded effect - Increased visibility */
+      filter: blur(3px); /* Blurred effect */
+      z-index: 0; /* Behind all content */
+      pointer-events: none;
+      user-select: none;
+    }
+
+    /* --- FOOTER & ATTRIBUTION STYLES --- */
+    .site-footer {
+      position: fixed;
+      bottom: 0;
+      width: 100%;
+      background: rgba(10, 10, 10, 0.8);
+      color: #888;
+      text-align: center;
+      padding: 0.5rem;
+      font-family: 'Inter', sans-serif;
+      font-size: 0.8rem;
+      z-index: 9999;
+      border-top: 1px solid #333;
+      backdrop-filter: blur(5px);
+    }
+    
+    /* ADDED CURSOR TARGET CLASS TO FOOTER LINK */
+    .site-footer a.cursor-target {
+      color: #ff4655;
+      text-decoration: none;
+      font-weight: 600;
+      cursor: pointer;
+      margin-left: 5px;
+      display: inline-block; /* Helps with cursor detection */
+    }
+    
+    .site-footer a.cursor-target:hover {
+      text-decoration: underline;
+    }
+
+    /* --- ATTRIBUTION PAGE --- */
+    #page-attribution {
+      background-image: url('Images/Beta Key Art_VALORANT.jpg'); /* Reuse background */
+      background-size: cover;
+      background-position: center;
+    }
+
+    /* Overlay for Attribution Page only (to darken/blur) */
+    #page-attribution::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(10, 10, 10, 0.8);
+      backdrop-filter: blur(10px); /* Blur the background */
+      z-index: 1;
+    }
+
+    .attribution-content {
+      position: relative; /* To sit above overlay */
+      z-index: 2;
+      width: 80%;
+      max-width: 800px;
+      max-height: 90vh;
+      background: rgba(21, 21, 21, 0.8); /* Slightly transparent container */
+      border: 2px solid #ff4655;
+      padding: 2rem;
+      color: #eee;
+      font-family: 'Inter', sans-serif;
+      line-height: 1.6;
+      overflow-y: auto;
+      border-radius: 8px;
+      box-shadow: 0 0 50px rgba(255, 70, 85, 0.2);
+    }
+    
+    .attribution-content h2 {
+      font-family: 'Valorant', sans-serif;
+      color: #ff4655;
+      border-bottom: 1px solid #444;
+      padding-bottom: 0.5rem;
+      margin-top: 0;
+    }
+    
+    .attribution-content h3 {
+      color: #fff;
+      margin-top: 1.5rem;
+      margin-bottom: 0.5rem;
+    }
+    
+    .attribution-content p {
+      margin-bottom: 1rem;
+      font-size: 0.95rem;
+      color: #ccc;
+    }
+
+  </style>
+</head>
+<body>
+
+  <!-- 
+    HTML for the cursor
+    (This remains unchanged)
+  -->
+  <div class="target-cursor-wrapper">
+    <div class="target-cursor-dot"></div>
+    <div class="target-cursor-corner corner-tl"></div>
+    <div class="target-cursor-corner corner-tr"></div>
+    <div class="target-cursor-corner corner-br"></div>
+    <div class="target-cursor-corner corner-bl"></div>
+  </div>
+
+  <!-- --- VIDEO MODAL --- -->
+  <div id="video-modal">
+    <div class="modal-content">
+      <button class="close-modal-btn">CLOSE X</button>
+      <div class="video-wrapper">
+        <video id="modal-video" controls>
+          <source src="" type="video/mp4">
+          Your browser does not support the video tag.
+        </video>
+      </div>
+    </div>
+  </div>
+
+  <!-- 
+    Page 1: Home
+  -->
+  <div id="page-home" class="page active-page">
+    <div class="content-wrapper">
+
+      <!-- NEW: Top Row -->
+      <div class="top-row">
+        <!-- 
+          MOVED: "defy_the_limits.png" to top-left.
+        -->
+        <img src="Images/defy_the_limits.png" alt="Defy the limits" class="sub-graphic defy-limits">
+        
+        <!-- 
+          MOVED: "Picture6.png" to top-center.
+        -->
+        <img src="Images/Picture1.png" alt="Decorative graphic" class="sub-graphic footer-graphic">
+        
+        <!-- 
+          MOVED: "the_battlefield_is_your_arena.png" to top-right.
+        -->
+        <img src="Images/the_battlefield_is_your_arena.png" alt="The battlefield is your arena" class="sub-graphic battlefield-arena">
+      </div>
+
+      <!-- NEW: Center Content Wrapper -->
+      <div class="center-content">
+        <!-- 
+          UPDATED: Replaced H1 text with your logo.
+          You must replace this placeholder URL with your "AIMLESS.png" file.
+        -->
+        <h1>
+          <img src="Images/AIMLESS.png" alt="AIMLESS" class="team-logo">
+        </h1>
+        
+        <!-- 
+          NEW: Added sub-graphic.
+          You must replace this placeholder URL with your "meet_the_group.png" file.
+        -->
+        <img src="Images/meet_the_group.png" alt="Meet the group" class="sub-graphic meet-group">
+
+        <div class="button-container">
+          <button id="btn-iso" class="cursor-target iso-button"><span>Iso</span></button>
+          <button id="btn-sage" class="cursor-target sage-button"><span>Sage</span></button>
+          <button id="btn-yoru" class="cursor-target yoru-button"><span>Yoru</span></button>
+        </div>
+      </div>
+
+      <!-- NEW: Empty spacer for bottom -->
+      <div class="bottom-spacer"></div>
+
+    </div>
+  </div>
+
+  <!-- 
+    Page 2: Sage
+  -->
+  <div id="page-sage" class="page">
+    <img src="Images/Picture2.png" class="page-bg-icon" alt="Sentinel Icon">
+    <div class="character-layout">
+      <!-- Character Card -->
+      <div class="character-card left">
+        <img src="Images/Sage_Artwork_Full.png" alt="Sage" class="character-portrait">
+        <h2>Sage</h2>
+
+        <!-- NEW: The hidden description panel -->
+        <div class="card-description">
+          <div>
+            <h3>Agent Info</h3>
+            <p>The bastion of China, Sage creates safety for herself and her team wherever she goes. Able to revive fallen friends and stave off aggressive pushes, she provides a calm center to a hellish fight.</p>
+          </div>
+
+          <!-- Abilities Section -->
+          <div class="abilities-container">
+            <h4>Abilities</h4>
+            <div class="abilities-row">
+              <!-- Ability 1 -->
+              <div class="ability-icon">
+                <!-- Replace src with actual icon -->
+                <img src="Images/Barrier_Orb.webp" alt="Barrier Orb">
+                <div class="ability-video-popup">
+                   <!-- Replace src with actual video -->
+                   <video autoplay loop muted playsinline>
+                     <source src="https://cmsassets.rgpub.io/sanity/files/dsfx7636/game_data/a79b1d6838cee5572b428babd74a2db0c07f4ea5.mp4" type="video/mp4">
+                   </video>
+                </div>
+              </div>
+              <!-- Ability 2 -->
+              <div class="ability-icon">
+                <img src="Images/Slow_Orb.webp" alt="Slow Orb">
+                 <div class="ability-video-popup">
+                   <video autoplay loop muted playsinline>
+                     <source src="https://cmsassets.rgpub.io/sanity/files/dsfx7636/game_data/45053483528b96cbe003ac39e6b53c9866d5fea6.mp4" type="video/mp4">
+                   </video>
+                </div>
+              </div>
+              <!-- Ability 3 -->
+              <div class="ability-icon">
+                <img src="Images/Healing_Orb.webp" alt="Healing Orb">
+                 <div class="ability-video-popup">
+                   <video autoplay loop muted playsinline>
+                     <source src="https://cmsassets.rgpub.io/sanity/files/dsfx7636/game_data/a247d196383136d3de15b4d6d9c816e3c8054ba0.mp4" type="video/mp4">
+                   </video>
+                </div>
+              </div>
+              <!-- Ability 4 -->
+              <div class="ability-icon">
+                <img src="Images/Resurrection.webp" alt="Resurrection">
+                 <div class="ability-video-popup">
+                   <video autoplay loop muted playsinline>
+                     <source src="https://cmsassets.rgpub.io/sanity/files/dsfx7636/game_data/df83929ed5da349c37a5bf4600c2b55010c72402.mp4" type="video/mp4">
+                   </video>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Player Card -->
+      <div class="character-card right">
+        <img src="https://www.mountaineers.org/images/placeholder-images/placeholder-300-x-400/@@images/image.jpeg" alt="Player 1" class="character-portrait">
+        <h2>Farsight &gt;&lt; HASH</h2>
+
+        <!-- NEW: The hidden description panel -->
+        <div class="card-description">
+          <div>
+            <h3>Player Info</h3>
+            <p>Something to Write IG</p>
+          </div>
+
+          <div class="abilities-container">
+            <h4>Current Settings</h4>
+
+            <div class="settings-text">
+              Sensitivity: 0.35
+              DPI: 800
+              Crosshair: 1-4-2-2
+              Resolution: 1920x1080
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="back-button-container">
+      <button class="cursor-target back-button">Back</button>
+    </div>
+  </div>
+
+
+  <!-- 
+    Page 3: Iso
+  -->
+  <div id="page-iso" class="page">
+    <img src="Images/Picture3.png" class="page-bg-icon" alt="Duelist Icon">
+    <div class="character-layout">
+      <!-- Character Card -->
+      <div class="character-card left">
+        <img src="Images/Iso_Artwork_Full.png" alt="Iso" class="character-portrait">
+        <h2>Iso</h2>
+
+        <!-- NEW: The hidden description panel -->
+        <div class="card-description">
+          <div>
+            <h3>Agent Info</h3>
+            <p>Chinese fixer for hire Iso goes into a flow state to dismantle the opposition. Reconfiguring ambient energy into bulletproof protection, he advances with focus towards his next duel to the death.</p>
+          </div>
+
+          <!-- Abilities Section -->
+          <div class="abilities-container">
+            <h4>Abilities</h4>
+            <div class="abilities-row">
+              <!-- Ability 1 -->
+              <div class="ability-icon">
+                <!-- Replace src with actual icon -->
+                <img src="Images/Contingency.webp" alt="Contingency">
+                <div class="ability-video-popup">
+                   <!-- Replace src with actual video -->
+                   <video autoplay loop muted playsinline>
+                     <source src="https://cmsassets.rgpub.io/sanity/files/dsfx7636/game_data/5e331c774ffde4e8e0c45a8844b0237b7d75ba3b.mp4" type="video/mp4">
+                   </video>
+                </div>
+              </div>
+              <!-- Ability 2 -->
+              <div class="ability-icon">
+                <img src="Images/Undercut.webp" alt="Undercut">
+                 <div class="ability-video-popup">
+                   <video autoplay loop muted playsinline>
+                     <source src="https://cmsassets.rgpub.io/sanity/files/dsfx7636/game_data/17503f71b58f654d583a66e29dab75460677576f.mp4" type="video/mp4">
+                   </video>
+                </div>
+              </div>
+              <!-- Ability 3 -->
+              <div class="ability-icon">
+                <img src="Images/Double_Tap.webp" alt="Double Tap">
+                 <div class="ability-video-popup">
+                   <video autoplay loop muted playsinline>
+                     <source src="https://cmsassets.rgpub.io/sanity/files/dsfx7636/game_data/11ad2731215ec978c89fdb675aaf3b591c3c3c55.mp4" type="video/mp4">
+                   </video>
+                </div>
+              </div>
+              <!-- Ability 4 -->
+              <div class="ability-icon">
+                <img src="Images/Kill_Contract.webp" alt="Kill Contract">
+                 <div class="ability-video-popup">
+                   <video autoplay loop muted playsinline>
+                     <source src="https://cmsassets.rgpub.io/sanity/files/dsfx7636/game_data/6fbd2b0e16ac3bda095094770ce6b1d403fc3832.mp4" type="video/mp4">
+                   </video>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Player Card -->
+      <div class="character-card right">
+        <img src="https://www.mountaineers.org/images/placeholder-images/placeholder-300-x-400/@@images/image.jpeg" alt="Player 2" class="character-portrait">
+        <h2>Haru &gt;&lt; ssi</h2>
+
+        <!-- NEW: The hidden description panel -->
+        <div class="card-description">
+          <div>
+            <h3>Player Info</h3>
+            <p>Something to Write IG</p>
+          </div>
+
+          <!-- Fav Weapons -->
+          <div class="abilities-container">
+            <h4>Current Settings</h4>
+
+            <div class="settings-text">
+              Sensitivity: 0.35
+              DPI: 800
+              Crosshair: 1-4-2-2
+              Resolution: 1920x1080
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="back-button-container">
+      <button class="cursor-target back-button">Back</button>
+    </div>
+  </div>
+
+  <!-- 
+    Page 4: Yoru
+  -->
+  <div id="page-yoru" class="page">
+    <img src="Images/Picture3.png" class="page-bg-icon" alt="Duelist Icon">
+    <div class="character-layout">
+      <!-- Character Card -->
+      <div class="character-card left">
+        <img src="Images/Yoru_Artwork_Full.png" alt="Yoru" class="character-portrait">
+        <h2>Yoru</h2>
+
+        <!-- NEW: The hidden description panel -->
+        <div class="card-description">
+          <div>
+            <h3>Agent Info</h3>
+            <p>Japanese native Yoru rips holes straight through reality to infiltrate enemy lines unseen. Using deception and aggression in equal measure, he gets the drop on each target before they know where to look.</p>
+          </div>
+
+          <!-- Abilities Section -->
+          <div class="abilities-container">
+            <h4>Abilities</h4>
+            <div class="abilities-row">
+              <!-- Ability 1 -->
+              <div class="ability-icon">
+                <!-- Replace src with actual icon -->
+                <img src="Images/Fakeout.webp" alt="Fakeout">
+                <div class="ability-video-popup">
+                   <!-- Replace src with actual video -->
+                   <video autoplay loop muted playsinline>
+                     <source src="https://cmsassets.rgpub.io/sanity/files/dsfx7636/game_data/ef008c8e848a054f88e88f173c03279a45a1c796.mp4" type="video/mp4">
+                   </video>
+                </div>
+              </div>
+              <!-- Ability 2 -->
+              <div class="ability-icon">
+                <img src="Images/Blindside.webp" alt="Blindside">
+                 <div class="ability-video-popup">
+                   <video autoplay loop muted playsinline>
+                     <source src="https://cmsassets.rgpub.io/sanity/files/dsfx7636/game_data/295ab26ef6097d28da0bef9c9b4c6185a80071c8.mp4" type="video/mp4">
+                   </video>
+                </div>
+              </div>
+              <!-- Ability 3 -->
+              <div class="ability-icon">
+                <img src="Images/Gatecrash.webp" alt="Gatecrash">
+                 <div class="ability-video-popup">
+                   <video autoplay loop muted playsinline>
+                     <source src="https://cmsassets.rgpub.io/sanity/files/dsfx7636/game_data/be352287c5704d82d1acbff5ecdee5187755d235.mp4" type="video/mp4">
+                   </video>
+                </div>
+              </div>
+              <!-- Ability 4 -->
+              <div class="ability-icon">
+                <img src="Images/Dimensional_Drift.webp" alt="Dimensional Drift">
+                 <div class="ability-video-popup">
+                   <video autoplay loop muted playsinline>
+                     <source src="https://cmsassets.rgpub.io/sanity/files/dsfx7636/game_data/9ca7fac6ec9514fa06b9785aad2ead0c3fba0eec.mp4" type="video/mp4">
+                   </video>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- Player Card -->
+      <div class="character-card right">
+        <img src="https://www.mountaineers.org/images/placeholder-images/placeholder-300-x-400/@@images/image.jpeg" alt="Player 3" class="character-portrait">
+        <h2>ENVY Voidster &gt;&lt; 3006</h2>
+
+        <!-- NEW: The hidden description panel -->
+        <div class="card-description">
+          <div>
+            <h3>Player Info</h3>
+            <p>GAY</p>
+          </div>
+
+          <!-- Fav Weapons -->
+          <div class="abilities-container">
+            <h4>Favorite Weapons</h4>
+
+            <div class="settings-text">
+              Sensitivity: 0.35
+              DPI: 800
+              Crosshair: 1-4-2-2
+              Resolution: 1920x1080
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="back-button-container">
+      <button class="cursor-target back-button">Back</button>
+    </div>
+  </div>
+
+  <!-- --- ATTRIBUTION PAGE (NEW) --- -->
+  <div id="page-attribution" class="page">
+    <div class="attribution-content">
+      <button class="close-btn back-button" id="close-attribution">BACK TO HOME</button>
+      
+      <h2 style="padding-top: 1rem;">Attribution & Project Details</h2>
+      
+      <h3>Section A: Riot Games</h3>
+      <p><strong>I. Third-Party Intellectual Property & Compliance</strong><br>
+      This website uses visual assets, imagery, and intellectual property (IP) derived from the official VALORANT website and related Riot Games materials.</p>
+      
+      <p><strong>Legal Disclaimer:</strong><br>
+      "AIMLESS" was created under Riot Games' "Legal Jibber Jabber" policy using assets owned by Riot Games. Riot Games does not endorse or sponsor this project. All rights for the assets belong to Riot Games, Inc.</p>
+      
+      <h3>Section B: Aimless Team</h3>
+      <p><strong>II. Project Development & Copyright</strong><br>
+      <strong>Project Title:</strong> Aimless<br>
+      <strong>Development & Code:</strong><br>
+      All original front-end coding, website structure, responsiveness, and feature implementation were designed and developed entirely by Aimless Team. We assert copyright over all original code, text, and organizational structure.</p>
+      
+      <p><strong>Copyright:</strong> &copy; 2025 Aimless Team. All Rights Reserved.<br>
+      <strong>Contact:</strong> aimlessesportsteam@gmail.com</p>
+    </div>
+  </div>
+
+  <!-- --- FOOTER --- -->
+  <footer class="site-footer">
+    &copy; 2025 Aimless Team. | Developed by Aimless. | <a id="open-attribution-btn" class="cursor-target">Attribution</a>
+  </footer>
+
+  <script>
+    // Wait for the DOM to be fully loaded before running the script
+    document.addEventListener('DOMContentLoaded', () => {
+
+      // --- Configuration (from React props) ---
+      const config = {
+        targetSelector: '.cursor-target',
+        spinDuration: 2,
+        hideDefaultCursor: true,
+        hoverDuration: 0.2,
+        parallaxOn: true
+      };
+
+      // --- Ability Video Interaction Logic ---
+      
+      // Select all ability icons that have a video popup
+      const abilityIcons = document.querySelectorAll('.ability-icon');
+
+      abilityIcons.forEach(icon => {
+        const videoPopup = icon.querySelector('.ability-video-popup video');
+        
+        if (videoPopup) {
+          // Force mute for autoplay policy
+          videoPopup.muted = true; 
+          
+          // Play on mouse enter
+          icon.addEventListener('mouseenter', () => {
+            const playPromise = videoPopup.play();
+            if (playPromise !== undefined) {
+                playPromise.catch(error => {
+                  // Autoplay prevented error handling
+                });
+            }
+          });
+
+          // Pause on mouse leave (removed the currentTime reset)
+          icon.addEventListener('mouseleave', () => {
+            videoPopup.pause();
+          });
+        }
+      });
+
+      // --- Constants (from useMemo) ---
+      const constants = {
+        borderWidth: 3,
+        cornerSize: 12
+      };
+
+      // --- Mobile Check (from useMemo) ---
+      const isMobile = (() => {
+        const hasTouchScreen = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+        const isSmallScreen = window.innerWidth <= 768;
+        const userAgent = navigator.userAgent || navigator.vendor || window.opera;
+        const mobileRegex = /android|webos|iphone|ipad|ipod|blackberry|iemobile|opera mini/i;
+        const isMobileUserAgent = mobileRegex.test(userAgent.toLowerCase());
+        return (hasTouchScreen && isSmallScreen) || isMobileUserAgent;
+      })();
+
+      // If mobile, abort the script
+      if (isMobile) {
+        console.log("TargetCursor disabled for mobile.");
+        document.body.style.cursor = 'auto'; // Show default cursor
+        
+        // --- Mobile Navigation (still hide/show pages) ---
+        // Find all pages
+        const pages = document.querySelectorAll('.page');
+        const homePage = document.getElementById('page-home');
+        
+        // Show the home page by default
+        pages.forEach(p => p.classList.remove('active-page'));
+        if(homePage) homePage.classList.add('active-page');
+
+        // Page switching function for mobile
+        const showPage = (pageId) => {
+          pages.forEach(p => p.classList.remove('active-page'));
+          const nextPage = document.getElementById(pageId);
+          if (nextPage) {
+            nextPage.classList.add('active-page');
+            window.scrollTo(0, 0);
+          }
+        };
+
+        // Add mobile click listeners
+        const btnSage = document.getElementById('btn-sage');
+        const btnIso = document.getElementById('btn-iso');
+        const btnYoru = document.getElementById('btn-yoru');
+        
+        if (btnSage) btnSage.addEventListener('click', () => showPage('page-sage'));
+        if (btnIso) btnIso.addEventListener('click', () => showPage('page-iso'));
+        if (btnYoru) btnYoru.addEventListener('click', () => showPage('page-yoru'));
+
+        document.querySelectorAll('.back-button').forEach(btn => {
+          btn.addEventListener('click', () => showPage('page-home'));
+        });
+        
+        // --- NEW MOBILE ATTRIBUTION LOGIC (ADD THIS) ---
+        const openAttributionBtnMobile = document.getElementById('open-attribution-btn');
+        if (openAttributionBtnMobile) openAttributionBtnMobile.addEventListener('click', (e) => {
+          e.preventDefault();
+          showPage('page-attribution');
+        });
+
+        return; // Stop execution of the cursor logic
+      }
+      
+      // --- State Variables (from React refs) ---
+      let cursorEl = document.querySelector('.target-cursor-wrapper');
+      let dotEl = document.querySelector('.target-cursor-dot');
+      let cornersEl = document.querySelectorAll('.target-cursor-corner');
+      
+      let spinTl = null;
+      let targetCornerPositions = null;
+      let isActive = false;
+      
+      let activeStrength = { current: 0 }; 
+
+      // --- Variables for event handler logic ---
+      let activeTarget = null;
+      let currentLeaveHandler = null;
+      let resumeTimeout = null;
+      
+      const originalCursor = document.body.style.cursor;
+
+      if (config.hideDefaultCursor) {
+        document.body.style.cursor = 'none';
+      }
+
+      function moveCursor(x, y) {
+        if (!cursorEl) return;
+        gsap.to(cursorEl, {
+          x,
+          y,
+          duration: 0.1,
+          ease: 'power3.out'
+        });
+      }
+
+      gsap.set(cursorEl, {
+        xPercent: -50,
+        yPercent: -50,
+        x: window.innerWidth / 2,
+        y: window.innerHeight / 2
+      });
+
+      function createSpinTimeline() {
+        if (spinTl) {
+          spinTl.kill();
+        }
+        spinTl = gsap
+          .timeline({ repeat: -1 })
+          .to(cursorEl, { 
+            rotation: '+=360', 
+            duration: config.spinDuration, 
+            ease: 'none' 
+          });
+      }
+      createSpinTimeline(); 
+      
+      const tickerFn = () => {
+        if (!activeTarget || !cursorEl || !cornersEl) {
+          return;
+        }
+        const strength = activeStrength.current;
+        if (strength === 0) return;
+
+        // RECALCULATE RECT HERE to handle CSS transition resizing
+        const rect = activeTarget.getBoundingClientRect();
+        const { borderWidth, cornerSize } = constants;
+
+        // Update the target positions based on the current size of the button
+        targetCornerPositions = [
+          { x: rect.left - borderWidth, y: rect.top - borderWidth },
+          { x: rect.right + borderWidth - cornerSize, y: rect.top - borderWidth },
+          { x: rect.right + borderWidth - cornerSize, y: rect.bottom + borderWidth - cornerSize },
+          { x: rect.left - borderWidth, y: rect.bottom + borderWidth - cornerSize }
+        ];
+
+        const cursorX = gsap.getProperty(cursorEl, 'x');
+        const cursorY = gsap.getProperty(cursorEl, 'y');
+
+        cornersEl.forEach((corner, i) => {
+          const currentX = gsap.getProperty(corner, 'x');
+          const currentY = gsap.getProperty(corner, 'y');
+          const targetX = targetCornerPositions[i].x - cursorX;
+          const targetY = targetCornerPositions[i].y - cursorY;
+          const finalX = currentX + (targetX - currentX) * strength;
+          const finalY = currentY + (targetY - currentY) * strength;
+          const duration = strength >= 0.99 ? (config.parallaxOn ? 0.2 : 0) : 0.05;
+
+          gsap.to(corner, {
+            x: finalX,
+            y: finalY,
+            duration: duration,
+            ease: duration === 0 ? 'none' : 'power1.out',
+            overwrite: 'auto'
+          });
+        });
+      };
+
+      const moveHandler = e => moveCursor(e.clientX, e.clientY);
+      window.addEventListener('mousemove', moveHandler);
+
+      const scrollHandler = () => {
+        if (!activeTarget || !cursorEl) return;
+        const mouseX = gsap.getProperty(cursorEl, 'x');
+        const mouseY = gsap.getProperty(cursorEl, 'y');
+        const elementUnderMouse = document.elementFromPoint(mouseX, mouseY);
+        
+        const isStillOverTarget =
+          elementUnderMouse &&
+          (elementUnderMouse === activeTarget || elementUnderMouse.closest(config.targetSelector) === activeTarget);
+        
+        if (!isStillOverTarget) {
+          if (currentLeaveHandler) {
+            currentLeaveHandler();
+          }
+        }
+      };
+      window.addEventListener('scroll', scrollHandler, { passive: true });
+
+      const mouseDownHandler = () => {
+        if (!dotEl) return;
+        gsap.to(dotEl, { scale: 0.7, duration: 0.3 });
+        gsap.to(cursorEl, { scale: 0.9, duration: 0.2 });
+      };
+      const mouseUpHandler = () => {
+        if (!dotEl) return;
+        gsap.to(dotEl, { scale: 1, duration: 0.3 });
+        gsap.to(cursorEl, { scale: 1, duration: 0.2 });
+      };
+      window.addEventListener('mousedown', mouseDownHandler);
+      window.addEventListener('mouseup', mouseUpHandler);
+
+      const cleanupTarget = target => {
+        if (currentLeaveHandler && target) {
+          target.removeEventListener('mouseleave', currentLeaveHandler);
+        }
+        currentLeaveHandler = null;
+      };
+
+      const enterHandler = e => {
+        const directTarget = e.target;
+        if (!directTarget) return;
+
+        const target = directTarget.closest(config.targetSelector);
+
+        if (!target || !cursorEl || !cornersEl) return;
+        if (activeTarget === target) return; 
+        
+        if (activeTarget) {
+          cleanupTarget(activeTarget);
+        }
+        
+        if (resumeTimeout) {
+          clearTimeout(resumeTimeout);
+          resumeTimeout = null;
+        }
+
+        activeTarget = target;
+        
+        cornersEl.forEach(corner => gsap.killTweensOf(corner));
+
+        gsap.killTweensOf(cursorEl, 'rotation');
+        spinTl?.pause();
+        gsap.set(cursorEl, { rotation: 0 }); 
+
+        const rect = target.getBoundingClientRect();
+        const { borderWidth, cornerSize } = constants;
+        
+        const cursorX = gsap.getProperty(cursorEl, 'x');
+        const cursorY = gsap.getProperty(cursorEl, 'y');
+
+        targetCornerPositions = [
+          { x: rect.left - borderWidth, y: rect.top - borderWidth },
+          { x: rect.right + borderWidth - cornerSize, y: rect.top - borderWidth },
+          { x: rect.right + borderWidth - cornerSize, y: rect.bottom + borderWidth - cornerSize },
+          { x: rect.left - borderWidth, y: rect.bottom + borderWidth - cornerSize }
+        ];
+
+        isActive = true;
+        gsap.ticker.add(tickerFn); 
+
+        gsap.to(activeStrength, {
+          current: 1,
+          duration: config.hoverDuration,
+          ease: 'power2.out'
+        });
+
+        cornersEl.forEach((corner, i) => {
+          gsap.to(corner, {
+            x: targetCornerPositions[i].x - cursorX,
+            y: targetCornerPositions[i].y - cursorY,
+            duration: 0.2,
+            ease: 'power2.out'
+          });
+        });
+
+        const leaveHandler = () => {
+          gsap.ticker.remove(tickerFn); 
+
+          isActive = false;
+          targetCornerPositions = null;
+          gsap.set(activeStrength, { current: 0, overwrite: true }); 
+          activeTarget = null;
+
+          if (cornersEl) {
+            gsap.killTweensOf(cornersEl);
+            const { cornerSize } = constants;
+            const positions = [
+              { x: -cornerSize * 1.5, y: -cornerSize * 1.5 },
+              { x: cornerSize * 0.5, y: -cornerSize * 1.5 },
+              { x: cornerSize * 0.5, y: cornerSize * 0.5 },
+              { x: -cornerSize * 1.5, y: cornerSize * 0.5 }
+            ];
+            const tl = gsap.timeline();
+            cornersEl.forEach((corner, index) => {
+              tl.to(
+                corner,
+                {
+                  x: positions[index].x,
+                  y: positions[index].y,
+                  duration: 0.3,
+                  ease: 'power3.out'
+                },
+                0 
+              );
+            });
+          }
+
+          resumeTimeout = setTimeout(() => {
+            if (!activeTarget && cursorEl && spinTl) {
+              const currentRotation = gsap.getProperty(cursorEl, 'rotation');
+              const normalizedRotation = currentRotation % 360;
+              
+              createSpinTimeline();
+              spinTl.pause(); 
+                
+              gsap.to(cursorEl, {
+                rotation: normalizedRotation + 360, 
+                duration: config.spinDuration * (1 - normalizedRotation / 360),
+                ease: 'none',
+                onComplete: () => {
+                  spinTl?.restart(); 
+                }
+              });
+            }
+            resumeTimeout = null;
+          }, 50);
+
+          cleanupTarget(target);
+        };
+
+        currentLeaveHandler = leaveHandler;
+        target.addEventListener('mouseleave', leaveHandler);
+      };
+      
+      window.addEventListener('mouseover', enterHandler, { passive: true });
+
+      
+      // --- NEW NAVIGATION LOGIC ---
+      
+      // Find all pages
+      const pages = document.querySelectorAll('.page');
+      
+      // Page switching function
+      const showPage = (pageId) => {
+        pages.forEach(p => p.classList.remove('active-page'));
+        const nextPage = document.getElementById(pageId);
+        if (nextPage) {
+          nextPage.classList.add('active-page');
+          // Scroll to top of new page
+          window.scrollTo(0, 0);
+        }
+      };
+
+      // --- NEW ATTRIBUTION PAGE LOGIC ---
+      const openAttributionBtn = document.getElementById('open-attribution-btn');
+      const closeAttributionBtn = document.getElementById('close-attribution');
+
+      if (openAttributionBtn) {
+        openAttributionBtn.addEventListener('click', (e) => {
+          e.preventDefault(); // Prevent default link behavior
+          showPage('page-attribution');
+        });
+      }
+
+      if (closeAttributionBtn) {
+        // The close button for attribution already has the 'back-button' class, 
+        // so it *should* already be handled by the .back-button selector above.
+        // However, explicitly handling it ensures it works even if the back-button logic changes.
+        closeAttributionBtn.addEventListener('click', () => showPage('page-home'));
+      }
+
+      // Get buttons
+      const btnSage = document.getElementById('btn-sage');
+      const btnIso = document.getElementById('btn-iso');
+      const btnYoru = document.getElementById('btn-yoru');
+      
+      // Add click listeners for navigation
+      if (btnSage) btnSage.addEventListener('click', () => showPage('page-sage'));
+      if (btnIso) btnIso.addEventListener('click', () => showPage('page-iso'));
+      if (btnYoru) btnYoru.addEventListener('click', () => showPage('page-yoru'));
+
+      // Add click listeners for ALL "back" buttons
+      document.querySelectorAll('.back-button').forEach(btn => {
+        btn.addEventListener('click', () => showPage('page-home'));
+      });
+
+    });
+  </script>
+</body>
+</html>
